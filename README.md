@@ -12,6 +12,8 @@ labels/labels.json              per-cell ground truth: "<photo stem>/<DAY>_<SLOT
 splits/{train,valid,test}.txt   photo stems per split, assigned BY CAPTURE SCENE
 references/<set-id>/            empty-box reference photos (for the 6-channel CNN)
 models/<detector>/<version>/    trained models + card.json (see "Contributing a model")
+legacy/<set-name>/              pre-existing datasets that can't be regenerated
+                                from raw/ (e.g. ad-hoc-named crops); frozen as-is
 export/                         generated train folders — gitignored, never committed
 ```
 
