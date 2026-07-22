@@ -1,0 +1,13 @@
+{
+  "detector": "reference-conditioned CNN (6-channel)",
+  "file": "pill_classifier.onnx",
+  "trained_by": "retrain on pillbox-data",
+  "date": "2026-07-22",
+  "data_commit": "4d76bdb2302b4a4ae43c83970e669ba545516257",
+  "input": "1x6x128x96 float32 (cell RGB + empty-reference RGB), [0,1]",
+  "train_on": "splits/train.txt",
+  "validate_on": "splits/valid.txt",
+  "test_held_out": true,
+  "test_metrics": {"accuracy": 0.829, "f1_full": 0.866, "f1_empty": 0.763, "macro_f1": 0.815},
+  "notes": "trained with detect/train_classifier.py --splits-dir; drop-in for detect/pill_classifier.onnx"
+}
