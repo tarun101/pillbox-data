@@ -74,6 +74,53 @@ copy is seeded from its filename, so the export is byte-identical run to run.
 `--augment 3` yields ~2.4k images (Roboflow's exact 2,700 sat between 3× and
 4×). Omit the flag (default 1) for the plain, unaugmented crops.
 
+## Evaluating models (accuracy, camouflage, latency, power)
+
+All three detectors — the classical **DoG** baseline, the **reference-CNN**, and
+the **YOLO** classifier — run through shared harnesses in `pillbox/detect/`, so
+their numbers are directly comparable. The DoG baseline is fully classical (no
+weights, no training) and lives in `pillbox/detect/classify_cells.py`
+(`dog_response()` is the difference-of-Gaussians; its one threshold is fitted by
+`calibrate_dog.py`). You never run a model by hand — use these:
+
+**Accuracy / F1 across all models** on a labelled split:
+
+```bash
+python3 -m detect.paper_stats --data ~/pillbox-data --split test   # or: all
+```
+
+Writes the model-comparison table (accuracy / F1 / macro-F1 / RMSE / params) and
+the bar chart. Use `--split test` for the frozen held-out number, `--split all`
+to sanity-check on everything labelled.
+
+**Camouflage (Figure 5)** — recall on Full cells binned by pill-to-lid colour
+difference (ΔE), one line per model:
+
+```bash
+python3 -m detect.camouflage_eval --images <photos_dir> \
+    --labels <labels.json> --out dataset/camo
+```
+
+Writes `figure5.png` + `bins.json`. Each cell is scored against the **empty-box
+reference**, so include one empty-box reference photo when you shoot a new box
+or setup.
+
+**Latency + power — run ON the Pi:**
+
+```bash
+python3 -m detect.paper_stats --data ~/pillbox-data --hardware
+```
+
+Latency (ms/photo) is measured on whatever device runs it, so run it on the
+actual Pi. `--hardware` also reads the **Pi 5 PMIC** for real power draw (net of
+idle baseline) → Figure 6. Power needs a **Pi 5** (the Pi 4 has no PMIC to
+query — latency still works there, power does not). Add `--latency-reps 20` for
+tighter timing averages.
+
+> Both harnesses need **ground-truth labels** for the cells you evaluate. Label
+> new captures in the app's Analyze modal ("Your labels" grid); they sync here
+> automatically, then the commands above pick them up.
+
 ## Ground rules
 
 - **Never train on `Test/`.** The test split is frozen — photos are never moved
