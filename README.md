@@ -49,9 +49,30 @@ the export any time — it always reflects the latest photos and label
 corrections. Train on it e.g. with:
 
 ```bash
-yolo classify train data=pillbox-data/export model=yolov8n-cls.pt imgsz=640
-yolo export model=runs/classify/train/weights/best.pt format=onnx imgsz=640
+yolo classify train data=pillbox-data/export model=yolov8n-cls.pt imgsz=224
+yolo export model=runs/classify/train/weights/best.pt format=onnx imgsz=224
 ```
+
+> **imgsz must match between train and export.** The shipped YOLO is a **224**
+> model — exporting a 224-trained model at 640 runs without error but returns
+> near-random predictions. Keep both commands on the same size.
+
+### Reproducing the augmented training set
+
+The original YOLO trained on a Roboflow export that expanded these ~1k cells to
+~2,700 "training images" by augmentation (flips, rotations, exposure). That was
+never a separate dataset — it's the same labelled cells — so it isn't stored
+here; regenerate it with `--augment N`:
+
+```bash
+python3 pillbox/detect/export_dataset.py --data pillbox-data --clean --augment 3
+```
+
+`--augment N` writes N images per **Train** crop (original + N-1 augmented
+copies); **Valid/Test always stay 1×** so evaluation is never inflated. Every
+copy is seeded from its filename, so the export is byte-identical run to run.
+`--augment 3` yields ~2.4k images (Roboflow's exact 2,700 sat between 3× and
+4×). Omit the flag (default 1) for the plain, unaugmented crops.
 
 ## Ground rules
 
